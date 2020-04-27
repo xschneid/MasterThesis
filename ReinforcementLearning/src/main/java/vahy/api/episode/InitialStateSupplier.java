@@ -4,6 +4,7 @@ import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
+import vahy.api.policy.PolicyMode;
 
 public interface InitialStateSupplier<
     TConfig extends ProblemConfig,
@@ -13,4 +14,5 @@ public interface InitialStateSupplier<
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>> {
 
     TState createInitialState();
+    TState createInitialState(PolicyMode policyMode);
 }

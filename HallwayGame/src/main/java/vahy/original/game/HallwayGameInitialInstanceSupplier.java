@@ -1,5 +1,6 @@
 package vahy.original.game;
 
+import vahy.api.policy.PolicyMode;
 import vahy.impl.episode.AbstractInitialStateSupplier;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.original.environment.HallwayAction;
@@ -7,6 +8,7 @@ import vahy.original.environment.agent.AgentHeading;
 import vahy.original.environment.config.GameConfig;
 import vahy.original.environment.state.EnvironmentProbabilities;
 import vahy.original.environment.state.HallwayStateImpl;
+import vahy.original.environment.state.RestrictedMovementData;
 import vahy.original.environment.state.StaticGamePart;
 import vahy.original.game.cell.Cell;
 import vahy.original.game.cell.CellType;
@@ -25,7 +27,7 @@ public class HallwayGameInitialInstanceSupplier extends AbstractInitialStateSupp
     }
 
     @Override
-    protected HallwayStateImpl createState_inner(GameConfig problemConfig, SplittableRandom random) {
+    protected HallwayStateImpl createState_inner(GameConfig problemConfig, PolicyMode policyMode, SplittableRandom random) {
         return createImmutableInitialState(problemConfig.getGameMatrix(), problemConfig, random);
     }
 
@@ -52,7 +54,7 @@ public class HallwayGameInitialInstanceSupplier extends AbstractInitialStateSupp
         int totalRewardsCount = (int) Arrays.stream(rewards).mapToLong(x -> Arrays.stream(x).filter(y -> y > 0.0).count()).sum();
         StaticGamePart staticGamePart = new StaticGamePart(gameConfig.getStateRepresentation(), trapProbabilities, ArrayUtils.cloneArray(rewards), walls, gameConfig.getStepPenalty(), gameConfig.getNoisyMoveProbability(), totalRewardsCount);
         ImmutableTuple<Integer, Integer> agentStartingPosition = generateInitialAgentCoordinates(gameSetup, random);
-        return new HallwayStateImpl(staticGamePart, rewards, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), AgentHeading.NORTH);
+        return new HallwayStateImpl(staticGamePart, rewards, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), AgentHeading.NORTH, new RestrictedMovementData(false));
     }
 
 

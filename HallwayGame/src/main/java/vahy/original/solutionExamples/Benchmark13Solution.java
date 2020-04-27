@@ -3,6 +3,7 @@ package vahy.original.solutionExamples;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfigBuilder;
+import vahy.config.EvaluatorType;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
@@ -55,7 +56,7 @@ public class Benchmark13Solution extends DefaultLocalBenchmark {
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
             .stageCount(3000)
-
+                .evaluatorType(EvaluatorType.RALF)
             .maximalStepCountBound(500)
 
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)

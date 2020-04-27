@@ -27,7 +27,7 @@ public class Benchmark01Solution extends DefaultLocalBenchmark {
     private static Logger logger = LoggerFactory.getLogger(Benchmark01Solution.class.getName());
 
     public static void main(String[] args) {
-        var benchmark = new Benchmark03Solution();
+        var benchmark = new Benchmark01Solution();
         benchmark.runBenchmark();
     }
 

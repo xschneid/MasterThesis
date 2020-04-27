@@ -114,7 +114,7 @@ public class GameSamplerImpl<
 
         var episodesToSample = new ArrayList<Callable<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>>(episodeBatchSize);
         for (int i = 0; i < episodeBatchSize; i++) {
-            TState initialGameState = initialStateSupplier.createInitialState();
+            TState initialGameState = initialStateSupplier.createInitialState(policyMode);
             var paperPolicy = supplyPlayerPolicy(initialGameState, policyMode);
             var opponentPolicy = supplyOpponentPolicy(initialGameState, policyMode);
             var paperEpisode = new EpisodeSetupImpl<>(initialGameState, paperPolicy, opponentPolicy, stepCountLimit);

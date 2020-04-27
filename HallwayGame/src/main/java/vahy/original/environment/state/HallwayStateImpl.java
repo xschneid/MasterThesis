@@ -1,6 +1,9 @@
 package vahy.original.environment.state;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.model.StateRewardReturn;
+import vahy.impl.learning.trainer.GameSamplerImpl;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.original.environment.HallwayAction;
@@ -17,12 +20,17 @@ import java.util.List;
 
 public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
 
+    private static final Logger logger = LoggerFactory.getLogger(GameSamplerImpl.class.getName());
+
     public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
     public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 4;
 
     public static final int AGENT_LOCATION_REPRESENTATION = -3;
     public static final int TRAP_LOCATION_REPRESENTATION = -2;
     public static final int WALL_LOCATION_REPRESENTATION = -1;
+
+    public static final int MAXIMUM_TURNS = 4;
+    public static final int MAXIMUM_FORWARD = 2;
 
     private final StaticGamePart staticGamePart;
     private final double[][] rewards;
@@ -35,6 +43,9 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     private final boolean isAgentTurn;
     private final boolean hasAgentMoved;
     private final boolean hasAgentResigned;
+
+    private boolean restricted;
+    private RestrictedMovementData restrictedMovementData;
 
     public HallwayStateImpl(
         StaticGamePart staticGamePart,
@@ -61,6 +72,33 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
             false);
     }
 
+    public HallwayStateImpl(
+            StaticGamePart staticGamePart,
+            double[][] rewards,
+            int agentXCoordination,
+            int agentYCoordination,
+            AgentHeading agentHeading,
+            RestrictedMovementData restrictedMovementData) {
+        this(staticGamePart,
+                rewards,
+                agentXCoordination,
+                agentYCoordination,
+                agentHeading,
+                true,
+                Arrays
+                        .stream(rewards)
+                        .map(doubles -> Arrays
+                                .stream(doubles)
+                                .filter(value -> value > 0.0)
+                                .count())
+                        .mapToInt(Long::intValue)
+                        .sum(),
+                false,
+                false,
+                false,
+                restrictedMovementData);
+    }
+
     private HallwayStateImpl(
         StaticGamePart staticGamePart,
         double[][] rewards,
@@ -82,6 +120,30 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
         this.isAgentKilled = isAgentKilled;
         this.hasAgentMoved = hasAgentMoved;
         this.hasAgentResigned = hasAgentResigned;
+    }
+    private HallwayStateImpl(
+            StaticGamePart staticGamePart,
+            double[][] rewards,
+            int agentXCoordination,
+            int agentYCoordination,
+            AgentHeading agentHeading,
+            boolean isAgentTurn,
+            int rewardsLeft,
+            boolean isAgentKilled,
+            boolean hasAgentMoved,
+            boolean hasAgentResigned,
+            RestrictedMovementData restrictedMovementData) {
+        this.isAgentTurn = isAgentTurn;
+        this.staticGamePart = staticGamePart;
+        this.rewards = rewards;
+        this.agentXCoordination = agentXCoordination;
+        this.agentYCoordination = agentYCoordination;
+        this.agentHeading = agentHeading;
+        this.rewardsLeft = rewardsLeft;
+        this.isAgentKilled = isAgentKilled;
+        this.hasAgentMoved = hasAgentMoved;
+        this.hasAgentResigned = hasAgentResigned;
+        this.restrictedMovementData = restrictedMovementData;
     }
 
     private ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities() {
@@ -162,16 +224,51 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     @Override
     public HallwayAction[] getAllPossibleActions() {
         if(isAgentTurn) {
+            if(restrictedMovementData.isEnabled()){
+                return getRestrictedMovementActions();
+            }
             return HallwayAction.playerActions;
         } else {
             return environmentActionsWithProbabilities().getFirst().toArray(new HallwayAction[0]);
         }
     }
 
+    private HallwayAction[] getRestrictedMovementActions() {
+        if(canGoForward() && restrictedMovementData.getLeft() > MAXIMUM_TURNS && restrictedMovementData.getRight() > MAXIMUM_TURNS){
+            return new HallwayAction[]{HallwayAction.FORWARD};
+        }
+        if(!canGoForward()){
+            if(restrictedMovementData.getRight() > MAXIMUM_TURNS){
+                if(restrictedMovementData.getForward() > MAXIMUM_FORWARD){
+                    return new HallwayAction[]{HallwayAction.TURN_LEFT};
+                }
+                return new HallwayAction[]{HallwayAction.TURN_LEFT, HallwayAction.FORWARD};
+            }
+            if(restrictedMovementData.getLeft() > MAXIMUM_TURNS){
+                if(restrictedMovementData.getForward() > MAXIMUM_FORWARD){
+                    return new HallwayAction[]{HallwayAction.TURN_RIGHT};
+                }
+                return new HallwayAction[]{HallwayAction.TURN_RIGHT, HallwayAction.FORWARD};
+            }
+            if(restrictedMovementData.getForward() > MAXIMUM_FORWARD){
+                return new HallwayAction[]{HallwayAction.TURN_LEFT, HallwayAction.TURN_RIGHT};
+            }
+        }
+        return HallwayAction.playerActions;
+    }
+
+    private boolean canGoForward(){
+        var coordinates = getForwardCoordinates(agentXCoordination, agentYCoordination, agentHeading);
+        return !staticGamePart.getWalls()[coordinates.getFirst()][coordinates.getSecond()];
+    }
+
     @Override
     public HallwayAction[] getPossiblePlayerActions() {
         if(isAgentTurn) {
-            return HallwayAction.playerActions;
+            if(restrictedMovementData.isEnabled()){
+                return getRestrictedMovementActions();
+            }
+            return  HallwayAction.playerActions;
         } else {
             return new HallwayAction[0];
         }
@@ -180,6 +277,9 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     @Override
     public HallwayAction[] getPossibleOpponentActions() {
         if(isOpponentTurn()) {
+            if(restrictedMovementData.isEnabled()){
+                return getRestrictedMovementActions();
+            }
             return HallwayAction.playerActions;
         } else {
             return new HallwayAction[0];
@@ -198,6 +298,13 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
             switch (hallwayAction) {
                 case FORWARD:
                     ImmutableTuple<Integer, Integer> agentCoordinates = makeForwardMove();
+                    ///
+                    if(canGoForward()) {
+                        restrictedMovementData.moved();
+                    }else {
+                        restrictedMovementData.addAction(hallwayAction);
+                    };
+                    ///
                     double reward = rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] - staticGamePart.getDefaultStepPenalty();
                     double[][] newRewards = ArrayUtils.cloneArray(rewards);
                     int rewardCount = rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] != 0.0 ? rewardsLeft - 1 : rewardsLeft;
@@ -215,11 +322,13 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                             rewardCount,
                             isAgentKilled,
                             agentCoordinates.getFirst() != agentXCoordination || agentCoordinates.getSecond() != agentYCoordination,
-                            false),
+                            false,
+                                restrictedMovementData.deepCopy()),
                         reward);
                 case TURN_RIGHT:
                 case TURN_LEFT:
                     AgentHeading newAgentHeading = agentHeading.turn(hallwayAction);
+                    restrictedMovementData.addAction(hallwayAction);
                     return new ImmutableStateRewardReturnTuple<>(
                         new HallwayStateImpl(
                             staticGamePart,
@@ -231,7 +340,8 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                             rewardsLeft,
                             isAgentKilled,
                             false,
-                            false),
+                            false,
+                                restrictedMovementData.deepCopy()),
                         -staticGamePart.getDefaultStepPenalty());
 //                case RESIGN:
 //                    return new ImmutableStateRewardReturnTuple<>(
@@ -264,7 +374,8 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                         rewardsLeft,
                         isAgentKilled,
                         false,
-                        false);
+                        false,
+                            restrictedMovementData.deepCopy());
                     return new ImmutableStateRewardReturnTuple<>(state, 0.0);
                 case NOISY_RIGHT:
                     ImmutableTuple<Integer, Integer> newRightCoordinates = makeRightMove();
@@ -278,7 +389,8 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                         rewardsLeft,
                         isAgentKilled,
                         false,
-                        false), 0.0);
+                        false,
+                            restrictedMovementData.deepCopy()), 0.0);
                 case NOISY_LEFT:
                     ImmutableTuple<Integer, Integer> newLeftCoordinates = makeLeftMove();
                     return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
@@ -291,7 +403,8 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                         rewardsLeft,
                         isAgentKilled,
                         false,
-                        false), 0.0);
+                        false,
+                            restrictedMovementData.deepCopy()), 0.0);
                 case TRAP:
                     return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
                         staticGamePart,
@@ -303,7 +416,8 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                         rewardsLeft,
                         true,
                         false,
-                        false), 0.0);
+                        false,
+                            restrictedMovementData.deepCopy()), 0.0);
                 case NOISY_RIGHT_TRAP:
                     ImmutableTuple<Integer, Integer> newRightTrapCoordinates = makeRightMove();
                     return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
@@ -316,7 +430,8 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                         rewardsLeft,
                         true,
                         false,
-                        false), 0.0);
+                        false,
+                            restrictedMovementData.deepCopy()), 0.0);
                 case NOISY_LEFT_TRAP:
                     ImmutableTuple<Integer, Integer> newLeftTrapCoordinates = makeLeftMove();
                     return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
@@ -329,7 +444,8 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                         rewardsLeft,
                         true,
                         false,
-                        false), 0.0);
+                        false,
+                            restrictedMovementData.deepCopy()), 0.0);
                 default:
                     throw EnumUtils.createExceptionForUnknownEnumValue(hallwayAction);
             }
@@ -348,7 +464,8 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
             rewardsLeft,
             isAgentKilled,
             hasAgentMoved,
-            hasAgentResigned);
+            hasAgentResigned,
+                restrictedMovementData.deepCopy());
     }
 
     @Override
@@ -645,6 +762,8 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     public boolean isAgentTurn() {
         return isAgentTurn;
     }
+
+    public void restrict() {restricted = true;}
 
     @Override
     public boolean equals(Object o) {
