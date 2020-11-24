@@ -76,6 +76,31 @@ public class PolicyBenchmark<
             var episodeList = gameSampler.sampleEpisodes(episodeCount, stepCountLimit);
             long end = System.currentTimeMillis();
             logger.info("Benchmarking [{}] policy took [{}] milliseconds", benchmarkingPolicy.getPolicyName(), end - start);
+
+////////////////
+
+            double maxReward = Double.MIN_VALUE;
+            double minReward = Double.MAX_VALUE;
+            int minEpisode = 0;
+            int maxEpisode = 0;
+            int episodeNumber = 1;
+            for (var episode: episodeList
+            ) {
+                if(episode.getTotalPayoff() > maxReward){
+                    maxReward = episode.getTotalPayoff();
+                    maxEpisode = episodeNumber;
+                }
+                if(episode.getTotalPayoff() < minReward){
+                    minReward = episode.getTotalPayoff();
+                    minEpisode = episodeNumber;
+                }
+                episodeNumber++;
+            }
+            logger.info("Benchmark MaxReward [{}] in episode [{}]", maxReward,maxEpisode);
+            logger.info("Benchmark MinReward [{}] in episode [{}]", minReward,minEpisode);
+
+///////////////////
+
             results.add(new PolicyResults<>(benchmarkingPolicy, episodeList, episodeStatisticsCalculator.calculateStatistics(episodeList), Duration.ofMillis(end - start)));
         }
         return results;

@@ -21,6 +21,7 @@ import vahy.utils.MathStreamUtils;
 import vahy.vizualiation.ProgressTracker;
 import vahy.vizualiation.ProgressTrackerSettings;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -112,6 +113,7 @@ public class GameSamplerImpl<
         logger.info("Initialized [{}] executors for sampling", processingUnitCount);
         ExecutorService executorService = Executors.newFixedThreadPool(processingUnitCount);
 
+        var startTrainingMillis = System.currentTimeMillis();
         var episodesToSample = new ArrayList<Callable<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>>(episodeBatchSize);
         for (int i = 0; i < episodeBatchSize; i++) {
             TState initialGameState = initialStateSupplier.createInitialState(policyMode);
@@ -119,8 +121,13 @@ public class GameSamplerImpl<
             var opponentPolicy = supplyOpponentPolicy(initialGameState, policyMode);
             var paperEpisode = new EpisodeSetupImpl<>(initialGameState, paperPolicy, opponentPolicy, stepCountLimit);
             var episodeSimulator = new EpisodeSimulatorImpl<>(resultsFactory);
+
+            episodeSimulator.number = i;
+
             episodesToSample.add(() -> episodeSimulator.calculateEpisode(paperEpisode));
         }
+        var endTrainingMillis = System.currentTimeMillis();
+        logger.info("sampling time [{}]ms", (endTrainingMillis - startTrainingMillis));
         try {
             var results = executorService.invokeAll(episodesToSample);
             var paperEpisodeHistoryList = results.stream().map(x -> {

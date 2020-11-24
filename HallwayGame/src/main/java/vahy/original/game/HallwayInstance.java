@@ -25,7 +25,9 @@ public enum HallwayInstance {
     BENCHMARK_16("examples/benchmark/benchmark_16.txt"),
     BENCHMARK_17("examples/benchmark/benchmark_17.txt"),
     BENCHMARK_18("examples/benchmark/benchmark_18.txt"),
-    BENCHMARK_19("examples/benchmark/benchmark_19.txt");
+    BENCHMARK_19("examples/benchmark/benchmark_19.txt"),
+    BENCHMARK_20("examples/benchmark/benchmark_20.txt"),
+    BENCHMARK_21("examples/benchmark/benchmark_21.txt");
 
     private String path;
 

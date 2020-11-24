@@ -32,6 +32,8 @@ public class EpisodeSimulatorImpl<
     private int playerStepsDone = 0;
     private double totalCumulativePayoff = 0.0;
 
+    public int number = 0;
+
     private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory;
 
     public EpisodeSimulatorImpl(EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory) {
@@ -84,6 +86,7 @@ public class EpisodeSimulatorImpl<
                 }
             }
             long end = System.currentTimeMillis();
+            //logger.info("episode[{}] end", number);
             return resultsFactory.createResults(episodeHistoryList, playerStepsDone, totalStepsDone, totalCumulativePayoff, Duration.ofMillis(end - start));
         } catch(Exception e) {
             throw new IllegalStateException(createErrorMsg(episodeHistoryList), e);

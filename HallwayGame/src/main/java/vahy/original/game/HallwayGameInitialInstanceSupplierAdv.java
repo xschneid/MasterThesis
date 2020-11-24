@@ -27,9 +27,9 @@ import java.util.stream.Collectors;
 public class HallwayGameInitialInstanceSupplierAdv extends AbstractInitialStateSupplier<GameConfig, HallwayAction,  DoubleVector, EnvironmentProbabilities, HallwayStateImpl>{
 
     private static final Logger logger = LoggerFactory.getLogger(GameSamplerImpl.class.getName());
-    public static final boolean RESTRICTED_MOVEMENT = false;
-    public static final boolean RANDOM_STARTING_POSITION = true;
-    public static final double STARTING_POSITION_CHANCE = 0.25;
+    public static final boolean RESTRICTED_MOVEMENT = true;
+    public static final boolean RANDOM_STARTING_POSITION = false;
+    public static final double STARTING_POSITION_CHANCE = 0.05;
 
     public HallwayGameInitialInstanceSupplierAdv(GameConfig gameConfig, SplittableRandom random) {
         super(gameConfig, random);

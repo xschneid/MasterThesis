@@ -55,7 +55,7 @@ public class Benchmark13Solution extends DefaultLocalBenchmark {
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
-            .stageCount(3000)
+            .stageCount(1)
                 .evaluatorType(EvaluatorType.RALF)
             .maximalStepCountBound(500)
 

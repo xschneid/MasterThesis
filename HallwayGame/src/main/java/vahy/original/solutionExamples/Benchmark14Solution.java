@@ -3,6 +3,7 @@ package vahy.original.solutionExamples;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfigBuilder;
+import vahy.config.EvaluatorType;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
@@ -20,9 +21,14 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExis
 import java.util.function.Supplier;
 
 public class Benchmark14Solution extends DefaultLocalBenchmark {
+    private int iterationCount;
+
+    public Benchmark14Solution(int iterationCount) {
+        this.iterationCount = iterationCount;
+    }
 
     public static void main(String[] args) {
-        var benchmark = new Benchmark14Solution();
+        var benchmark = new Benchmark14Solution(10);
         benchmark.runBenchmark();
     }
 
@@ -40,7 +46,7 @@ public class Benchmark14Solution extends DefaultLocalBenchmark {
 
     @Override
     protected PaperAlgorithmConfig createAlgorithmConfig() {
-        int batchSize = 200;
+        int batchSize = 100;
 
         return new AlgorithmConfigBuilder()
             //MCTS
@@ -54,10 +60,10 @@ public class Benchmark14Solution extends DefaultLocalBenchmark {
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
-            .stageCount(2000)
+            .stageCount(iterationCount)
 
             .maximalStepCountBound(500)
-
+            .evaluatorType(EvaluatorType.RALF)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
             .replayBufferSize(20000)

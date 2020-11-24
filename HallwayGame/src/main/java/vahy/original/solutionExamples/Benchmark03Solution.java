@@ -51,7 +51,7 @@ public class Benchmark03Solution extends DefaultLocalBenchmark {
             .trainingEpochCount(0)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(10)
+            .batchEpisodeCount(20)
 
             .maximalStepCountBound(1000)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)

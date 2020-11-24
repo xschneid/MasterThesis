@@ -45,13 +45,47 @@ public class PolicyTrainingCycle<
     }
 
     private void innerTrainPolicy() {
+        double stepCountOverall = 0;
+        double rewardCountOverall = 0;
         for (int i = 0; i < algorithmConfig.getStageCount(); i++) {
             logger.info("Training policy for [{}]th iteration", i);
             var episodes = trainer.trainPolicy(algorithmConfig.getBatchEpisodeCount(), algorithmConfig.getMaximalStepCountBound());
+////////////////
+
+            double step = 0;
+            double reward = 0;
+            double maxReward = -Double.MAX_VALUE;
+            double minReward = Double.MAX_VALUE;
+            int minEpisode = 0;
+            int maxEpisode = 0;
+            int episodeNumber = 1;
+            for (var episode: episodes
+            ) {
+                step += episode.getPlayerStepCount();
+                reward += episode.getTotalPayoff();
+                if(episode.getTotalPayoff() > maxReward){
+                    maxReward = episode.getTotalPayoff();
+                    maxEpisode = episodeNumber;
+                }
+                if(episode.getTotalPayoff() < minReward){
+                    minReward = episode.getTotalPayoff();
+                    minEpisode = episodeNumber;
+                }
+                episodeNumber++;
+            }
+            logger.info("Training MaxReward [{}] in episode [{}]", maxReward,maxEpisode);
+            logger.info("Training MinReward [{}] in episode [{}]", minReward,minEpisode);
+            stepCountOverall += step / episodes.size();
+            rewardCountOverall += reward / episodes.size();
+
+
+///////////////////
             if(systemConfig.dumpTrainingData()) {
                 episodeWriter.writeTrainingEpisode(i, episodes);
             }
         }
+        logger.info("Training AvgStepCountOverall [{}]", stepCountOverall/algorithmConfig.getStageCount());
+        logger.info("Training AvgRewardCountOverall [{}]", rewardCountOverall/algorithmConfig.getStageCount());
     }
 
 }

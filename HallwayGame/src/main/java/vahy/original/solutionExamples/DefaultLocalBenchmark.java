@@ -66,7 +66,7 @@ public class DefaultLocalBenchmark {
             .discountFactor(1)
             .batchEpisodeCount(100)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
-            .stageCount(100)
+            .stageCount(1)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
             .maximalStepCountBound(500)
@@ -134,8 +134,10 @@ public class DefaultLocalBenchmark {
             .setSingleThreadedEvaluation(false)
             .setEvalEpisodeCount(1000)
             .setDumpTrainingData(false)
+            .setDumpEvaluationData(true)
             .buildSystemConfig();
     }
+
 
     protected GameConfig createGameConfig() {
         return new ConfigBuilder()

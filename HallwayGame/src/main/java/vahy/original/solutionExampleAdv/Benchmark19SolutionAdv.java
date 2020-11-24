@@ -22,10 +22,10 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExis
 
 import java.util.function.Supplier;
 
-public class Benchmark13SolutionAdv extends DefaultLocalBenchmarkAdv {
+public class Benchmark19SolutionAdv extends DefaultLocalBenchmarkAdv {
 
     public static void main(String[] args) {
-        var benchmark = new Benchmark13SolutionAdv();
+        var benchmark = new Benchmark19SolutionAdv();
         benchmark.runBenchmark();
     }
 
@@ -34,12 +34,13 @@ public class Benchmark13SolutionAdv extends DefaultLocalBenchmarkAdv {
         return new ConfigBuilder()
                 .reward(100)
                 .noisyMoveProbability(0.0)
-                .stepPenalty(4)
-                .trapProbability(0.1)
+                .stepPenalty(1)
+                .trapProbability(0.05)
                 .stateRepresentation(StateRepresentation.COMPACT)
-                .gameStringRepresentation(HallwayInstance.BENCHMARK_13)
+                .gameStringRepresentation(HallwayInstance.BENCHMARK_19)
                 .buildConfig();
     }
+
 
     @Override
     protected PaperAlgorithmConfig createAlgorithmConfig() {
@@ -48,52 +49,52 @@ public class Benchmark13SolutionAdv extends DefaultLocalBenchmarkAdv {
         return new AlgorithmConfigBuilder()
                 //MCTS
                 .cpuctParameter(1)
-                .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+                .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
                 //.mcRolloutCount(1)
                 //NN
                 .trainingBatchSize(64)
-                .trainingEpochCount(1)
+                .trainingEpochCount(100)
                 .learningRate(0.1)
                 // REINFORCEMENTs
                 .discountFactor(1)
                 .batchEpisodeCount(batchSize)
-                .stageCount(1000)
-                .evaluatorType(EvaluatorType.RALF)
-                .maximalStepCountBound(500)
+                .stageCount(100)
+
+                .maximalStepCountBound(1000)
 
                 .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
                 .approximatorType(ApproximatorType.HASHMAP_LR)
-                .replayBufferSize(2000)
+                .evaluatorType(EvaluatorType.RALF)
+                .replayBufferSize(20000)
                 .selectorType(SelectorType.UCB)
-
-                .globalRiskAllowed(1.0)
+                .globalRiskAllowed(0.0)
+                .riskSupplier(() -> 0.0)
                 .explorationConstantSupplier(new Supplier<>() {
                     private int callCount = 0;
                     @Override
                     public Double get() {
-                        callCount++;
-                        var x = Math.exp(-callCount / 100000.0) / 2;
-                        if(callCount % batchSize == 0) {
-                            logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
-                        }
-                        return x;
-//                    return 1.0;
+//                    callCount++;
+//                    var x = Math.exp(-callCount / 1000000.0);
+//                    if(callCount % batchSize == 0) {
+//                        logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
+//                    }
+//                    return x;
+                        return 1.0;
                     }
                 })
                 .temperatureSupplier(new Supplier<>() {
-                    private int callCount = 0;
                     @Override
                     public Double get() {
                         callCount++;
-                        double x = Math.exp(-callCount / 200000.0) * 10;
+                        double x = Math.exp(-callCount / 200000.0) ;
                         if(callCount % batchSize == 0) {
                             logger.info("Temperature constant: [{}] in call: [{}]", x, callCount);
                         }
                         return x;
 //                    return 1.5;
                     }
+                    private int callCount = 0;
                 })
-                .riskSupplier(() -> 1.0)
                 .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
                 .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
                 .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)

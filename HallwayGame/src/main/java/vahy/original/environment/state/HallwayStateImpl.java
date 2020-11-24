@@ -29,8 +29,8 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     public static final int TRAP_LOCATION_REPRESENTATION = -2;
     public static final int WALL_LOCATION_REPRESENTATION = -1;
 
-    public static final int MAXIMUM_TURNS = 4;
-    public static final int MAXIMUM_FORWARD = 2;
+    public static final int MAXIMUM_TURNS = 0;
+    public static final int MAXIMUM_FORWARD = 0;
 
     private final StaticGamePart staticGamePart;
     private final double[][] rewards;
@@ -234,25 +234,10 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     }
 
     private HallwayAction[] getRestrictedMovementActions() {
-        if(canGoForward() && restrictedMovementData.getLeft() > MAXIMUM_TURNS && restrictedMovementData.getRight() > MAXIMUM_TURNS){
-            return new HallwayAction[]{HallwayAction.FORWARD};
-        }
-        if(!canGoForward()){
-            if(restrictedMovementData.getRight() > MAXIMUM_TURNS){
-                if(restrictedMovementData.getForward() > MAXIMUM_FORWARD){
-                    return new HallwayAction[]{HallwayAction.TURN_LEFT};
-                }
-                return new HallwayAction[]{HallwayAction.TURN_LEFT, HallwayAction.FORWARD};
-            }
-            if(restrictedMovementData.getLeft() > MAXIMUM_TURNS){
-                if(restrictedMovementData.getForward() > MAXIMUM_FORWARD){
-                    return new HallwayAction[]{HallwayAction.TURN_RIGHT};
-                }
-                return new HallwayAction[]{HallwayAction.TURN_RIGHT, HallwayAction.FORWARD};
-            }
-            if(restrictedMovementData.getForward() > MAXIMUM_FORWARD){
-                return new HallwayAction[]{HallwayAction.TURN_LEFT, HallwayAction.TURN_RIGHT};
-            }
+        //logger.info("tu som[{}]", restrictedMovementData.getForward());
+        if(!canGoForward() && restrictedMovementData.getForward() >= MAXIMUM_FORWARD){
+            //logger.info("tu som[{}]", restrictedMovementData.getForward());
+            return new HallwayAction[]{HallwayAction.TURN_RIGHT, HallwayAction.TURN_LEFT};
         }
         return HallwayAction.playerActions;
     }

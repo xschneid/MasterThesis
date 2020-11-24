@@ -14,6 +14,35 @@ public class RestrictedMovementData {
     private int forward = 0;
     private int left = 0;
     private int right = 0;
+    private int turned = 0;
+    private HallwayAction turning = HallwayAction.NO_ACTION;
+    private HallwayAction dTurning = HallwayAction.NO_ACTION;
+
+    public static final boolean FORWARD = false;
+
+    public HallwayAction getdTurning() {
+        return dTurning;
+    }
+
+    public void setdTurning(HallwayAction dTurning) {
+        this.dTurning = dTurning;
+    }
+
+    public int getTurned() {
+        return turned;
+    }
+
+    public void setTurned(int turned) {
+        this.turned = turned;
+    }
+
+    public void setTurning(HallwayAction turning) {
+        this.turning = turning;
+    }
+
+    public HallwayAction getTurning() {
+        return turning;
+    }
 
     public int getForward() {
         return forward;
@@ -54,11 +83,17 @@ public class RestrictedMovementData {
         }
     }
 
+    public void incTurned(){
+        turned++;
+    }
+
     public void moved(){
         notMoved = 0;
         forward = 0;
         left = 0;
         right = 0;
+        turned = 0;
+        turning = HallwayAction.NO_ACTION;
     }
 
     public boolean isEnabled(){
