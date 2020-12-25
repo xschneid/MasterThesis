@@ -67,7 +67,7 @@ public class DefaultLocalBenchmarkAdv {
                 .discountFactor(1)
                 .batchEpisodeCount(100)
                 .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
-                .stageCount(1)
+                .stageCount(100)
                 .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
                 .maximalStepCountBound(500)
@@ -133,7 +133,7 @@ public class DefaultLocalBenchmarkAdv {
                 .setDrawWindow(false)
                 .setParallelThreadsCount(Runtime.getRuntime().availableProcessors())
                 .setSingleThreadedEvaluation(false)
-                .setEvalEpisodeCount(1000)
+                .setEvalEpisodeCount(500)
                 .setDumpTrainingData(false)
                 .setDumpEvaluationData(true)
                 .buildSystemConfig();

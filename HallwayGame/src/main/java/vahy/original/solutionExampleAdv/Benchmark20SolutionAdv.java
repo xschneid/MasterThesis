@@ -29,7 +29,17 @@ public class Benchmark20SolutionAdv extends DefaultLocalBenchmarkAdv {
     }
 
     public static void main(String[] args) {
-        var benchmark = new Benchmark20SolutionAdv(30);
+        var benchmark = new Benchmark20SolutionAdv(10);
+        benchmark.runBenchmark();
+        benchmark = new Benchmark20SolutionAdv(20);
+        benchmark.runBenchmark();
+        benchmark = new Benchmark20SolutionAdv(30);
+        benchmark.runBenchmark();
+        benchmark = new Benchmark20SolutionAdv(40);
+        benchmark.runBenchmark();
+        benchmark = new Benchmark20SolutionAdv(50);
+        benchmark.runBenchmark();
+        benchmark = new Benchmark20SolutionAdv(60);
         benchmark.runBenchmark();
     }
 

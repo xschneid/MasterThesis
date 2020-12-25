@@ -50,12 +50,12 @@ public class Benchmark13Solution extends DefaultLocalBenchmark {
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(64)
-            .trainingEpochCount(1)
+            .trainingEpochCount(100)
             .learningRate(0.1)
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
-            .stageCount(1)
+            .stageCount(2)
                 .evaluatorType(EvaluatorType.RALF)
             .maximalStepCountBound(500)
 

@@ -51,7 +51,7 @@ public class Benchmark03Solution extends DefaultLocalBenchmark {
             .trainingEpochCount(0)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(20)
+            .batchEpisodeCount(100)
 
             .maximalStepCountBound(1000)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
@@ -60,7 +60,7 @@ public class Benchmark03Solution extends DefaultLocalBenchmark {
 
 
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))
-            .stageCount(50)
+            .stageCount(2)
             .evaluatorType(EvaluatorType.RALF_BATCHED)
             .globalRiskAllowed(1.00)
             .riskSupplier(() -> 1.00)

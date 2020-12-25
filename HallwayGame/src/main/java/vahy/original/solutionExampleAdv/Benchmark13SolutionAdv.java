@@ -57,7 +57,7 @@ public class Benchmark13SolutionAdv extends DefaultLocalBenchmarkAdv {
                 // REINFORCEMENTs
                 .discountFactor(1)
                 .batchEpisodeCount(batchSize)
-                .stageCount(1000)
+                .stageCount(100)
                 .evaluatorType(EvaluatorType.RALF)
                 .maximalStepCountBound(500)
 

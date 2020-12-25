@@ -30,7 +30,10 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     public static final int WALL_LOCATION_REPRESENTATION = -1;
 
     public static final int MAXIMUM_TURNS = 0;
-    public static final int MAXIMUM_FORWARD = 0;
+    public static final int MAXIMUM_FORWARD = 1;
+
+    //1 - zlozite  2 - jednoduche
+    public static final int TURN = 1;
 
     private final StaticGamePart staticGamePart;
     private final double[][] rewards;
@@ -44,7 +47,6 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     private final boolean hasAgentMoved;
     private final boolean hasAgentResigned;
 
-    private boolean restricted;
     private RestrictedMovementData restrictedMovementData;
 
     public HallwayStateImpl(
@@ -234,12 +236,34 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     }
 
     private HallwayAction[] getRestrictedMovementActions() {
+        if(TURN == 1){
+            if(restrictedMovementData.getRight() + restrictedMovementData.getLeft() >= 3){
+                if(canGoForward() && agentHeading != restrictedMovementData.getOppositeDirection()){
+                    return new HallwayAction[]{HallwayAction.FORWARD};
+                }
+                if(restrictedMovementData.getRight() > restrictedMovementData.getLeft()){
+                    return new HallwayAction[]{HallwayAction.FORWARD, HallwayAction.TURN_RIGHT};
+                }
+                if(restrictedMovementData.getRight() < restrictedMovementData.getLeft()){
+                    return new HallwayAction[]{HallwayAction.FORWARD, HallwayAction.TURN_LEFT};
+                }
+            }
+            return HallwayAction.playerActions;
+        }
+        if(TURN == 2){
+            if(restrictedMovementData.getRight() + restrictedMovementData.getLeft() >= 3){
+                if(canGoForward()){
+                    return new HallwayAction[]{HallwayAction.FORWARD};
+                }
+            }
+            return HallwayAction.playerActions;
+        }
         //logger.info("tu som[{}]", restrictedMovementData.getForward());
         if(!canGoForward() && restrictedMovementData.getForward() >= MAXIMUM_FORWARD){
             //logger.info("tu som[{}]", restrictedMovementData.getForward());
             return new HallwayAction[]{HallwayAction.TURN_RIGHT, HallwayAction.TURN_LEFT};
         }
-        return HallwayAction.playerActions;
+        return HallwayAction.playerActions; 
     }
 
     private boolean canGoForward(){
@@ -285,7 +309,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                     ImmutableTuple<Integer, Integer> agentCoordinates = makeForwardMove();
                     ///
                     if(canGoForward()) {
-                        restrictedMovementData.moved();
+                        restrictedMovementData.moved(agentHeading);
                     }else {
                         restrictedMovementData.addAction(hallwayAction);
                     };
@@ -747,8 +771,6 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     public boolean isAgentTurn() {
         return isAgentTurn;
     }
-
-    public void restrict() {restricted = true;}
 
     @Override
     public boolean equals(Object o) {

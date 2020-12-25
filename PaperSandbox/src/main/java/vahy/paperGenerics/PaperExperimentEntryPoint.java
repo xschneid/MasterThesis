@@ -163,7 +163,7 @@ public class PaperExperimentEntryPoint {
                                                           SplittableRandom masterRandom) throws IOException, InterruptedException {
         var approximatorType = algorithmConfig.getApproximatorType();
         var defaultPrediction = new double[2 + actionCount];
-        defaultPrediction[0] = 0;
+        defaultPrediction[0] = 0.0;
         defaultPrediction[1] = 0.0;
         for (int i = 0; i < actionCount; i++) {
             defaultPrediction[i + 2] = 1.0 / actionCount;
