@@ -133,7 +133,7 @@ public class DefaultLocalBenchmarkAdv {
                 .setDrawWindow(false)
                 .setParallelThreadsCount(Runtime.getRuntime().availableProcessors())
                 .setSingleThreadedEvaluation(false)
-                .setEvalEpisodeCount(500)
+                .setEvalEpisodeCount(1000)
                 .setDumpTrainingData(false)
                 .setDumpEvaluationData(true)
                 .buildSystemConfig();

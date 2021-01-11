@@ -61,12 +61,12 @@ public class DefaultLocalBenchmark {
 
             //NN
             .trainingBatchSize(1)
-            .trainingEpochCount(10)
+            .trainingEpochCount(100)
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
-            .stageCount(2)
+            .stageCount(10)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
             .maximalStepCountBound(500)
@@ -76,11 +76,11 @@ public class DefaultLocalBenchmark {
             .learningRate(0.01)
 
             .approximatorType(ApproximatorType.HASHMAP_LR)
-            .globalRiskAllowed(1.00)
+            .globalRiskAllowed(1.0)
             .riskSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
-                    return 1.00;
+                    return 1.0;
                 }
 
                 @Override
@@ -132,7 +132,7 @@ public class DefaultLocalBenchmark {
             .setDrawWindow(false)
             .setParallelThreadsCount(Runtime.getRuntime().availableProcessors())
             .setSingleThreadedEvaluation(false)
-            .setEvalEpisodeCount(500)
+            .setEvalEpisodeCount(1000)
             .setDumpTrainingData(false)
             .setDumpEvaluationData(true)
             .buildSystemConfig();

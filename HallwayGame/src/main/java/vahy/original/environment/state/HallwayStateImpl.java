@@ -29,7 +29,6 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     public static final int TRAP_LOCATION_REPRESENTATION = -2;
     public static final int WALL_LOCATION_REPRESENTATION = -1;
 
-    public static final int MAXIMUM_TURNS = 0;
     public static final int MAXIMUM_FORWARD = 1;
 
     //1 - zlozite  2 - jednoduche
@@ -237,28 +236,24 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
 
     private HallwayAction[] getRestrictedMovementActions() {
         if(TURN == 1){
-            if(restrictedMovementData.getRight() + restrictedMovementData.getLeft() >= 3){
-                if(canGoForward() && agentHeading != restrictedMovementData.getOppositeDirection()){
+            //logger.info("tu som[{}][{}]", restrictedMovementData.getRight(),restrictedMovementData.getLeft());
+            if((restrictedMovementData.getRight() + restrictedMovementData.getLeft()) > 3){
+                //logger.info("tu som[{}][{}]", restrictedMovementData.getRight(),restrictedMovementData.getLeft());
+                if(canGoForward()){
                     return new HallwayAction[]{HallwayAction.FORWARD};
                 }
                 if(restrictedMovementData.getRight() > restrictedMovementData.getLeft()){
+                    //logger.info("tu som[{}][{}]", restrictedMovementData.getRight(),restrictedMovementData.getLeft());
                     return new HallwayAction[]{HallwayAction.FORWARD, HallwayAction.TURN_RIGHT};
                 }
-                if(restrictedMovementData.getRight() < restrictedMovementData.getLeft()){
+                if(restrictedMovementData.getRight() <= restrictedMovementData.getLeft()){
+                    //logger.info("tu som[{}][{}]", restrictedMovementData.getRight(),restrictedMovementData.getLeft());
                     return new HallwayAction[]{HallwayAction.FORWARD, HallwayAction.TURN_LEFT};
                 }
             }
             return HallwayAction.playerActions;
         }
-        if(TURN == 2){
-            if(restrictedMovementData.getRight() + restrictedMovementData.getLeft() >= 3){
-                if(canGoForward()){
-                    return new HallwayAction[]{HallwayAction.FORWARD};
-                }
-            }
-            return HallwayAction.playerActions;
-        }
-        //logger.info("tu som[{}]", restrictedMovementData.getForward());
+        logger.info("tu som[{}]", restrictedMovementData.getForward());
         if(!canGoForward() && restrictedMovementData.getForward() >= MAXIMUM_FORWARD){
             //logger.info("tu som[{}]", restrictedMovementData.getForward());
             return new HallwayAction[]{HallwayAction.TURN_RIGHT, HallwayAction.TURN_LEFT};
@@ -303,17 +298,18 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
         if(isAgentTurn != hallwayAction.isPlayerAction()) {
             throw new IllegalStateException("Inconsistency between player turn and applying action");
         }
+        restrictedMovementData.addAction(hallwayAction);
         if(isAgentTurn) {
             switch (hallwayAction) {
                 case FORWARD:
-                    ImmutableTuple<Integer, Integer> agentCoordinates = makeForwardMove();
                     ///
                     if(canGoForward()) {
-                        restrictedMovementData.moved(agentHeading);
-                    }else {
-                        restrictedMovementData.addAction(hallwayAction);
-                    };
+                        restrictedMovementData.moved();
+                    }//else {
+                        //restrictedMovementData.addAction(hallwayAction);
+                    //};
                     ///
+                    ImmutableTuple<Integer, Integer> agentCoordinates = makeForwardMove();
                     double reward = rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] - staticGamePart.getDefaultStepPenalty();
                     double[][] newRewards = ArrayUtils.cloneArray(rewards);
                     int rewardCount = rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] != 0.0 ? rewardsLeft - 1 : rewardsLeft;
@@ -337,7 +333,6 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                 case TURN_RIGHT:
                 case TURN_LEFT:
                     AgentHeading newAgentHeading = agentHeading.turn(hallwayAction);
-                    restrictedMovementData.addAction(hallwayAction);
                     return new ImmutableStateRewardReturnTuple<>(
                         new HallwayStateImpl(
                             staticGamePart,

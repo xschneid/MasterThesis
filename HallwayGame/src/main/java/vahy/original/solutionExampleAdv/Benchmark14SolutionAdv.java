@@ -28,7 +28,7 @@ public class Benchmark14SolutionAdv extends DefaultLocalBenchmarkAdv {
         this.iterationCount = iterationCount;
     }
 
-    public static void main(String[] args) {/*
+    public static void main(String[] args) {
         var benchmark = new Benchmark14SolutionAdv(10);
         benchmark.runBenchmark();
         benchmark = new Benchmark14SolutionAdv(1);
@@ -42,9 +42,13 @@ public class Benchmark14SolutionAdv extends DefaultLocalBenchmarkAdv {
         benchmark = new Benchmark14SolutionAdv(7);
         benchmark.runBenchmark();
         benchmark = new Benchmark14SolutionAdv(15);
-        benchmark.runBenchmark();*/
+        benchmark.runBenchmark();
+        benchmark = new Benchmark14SolutionAdv(100);
+        benchmark.runBenchmark();/*
         var benchmark = new Benchmark14SolutionAdv(100);
         benchmark.runBenchmark();
+        var benchmark1 = new Benchmark20SolutionAdv(50);
+        benchmark1.runBenchmark();*/
     }
 
     @Override
